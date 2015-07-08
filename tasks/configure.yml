@@ -1,0 +1,33 @@
+---
+
+- name: setting mariadb configuration
+  template: src=my.cnf.j2 dest="{{mariadb_configuration}}" owner=root group=root mode=0640 backup=yes
+  notify: restart mariadb
+
+- meta: flush_handlers
+
+- name: check if ~/.my.cnf file already exists
+  stat: "path={{ mariadb_user_home }}/.my.cnf"
+  register: mycnf_file
+
+- name: update mariadb root password for all root accounts
+  mysql_user: name="root" host="{{ item }}" password="{{ mariadb_root_password }}"
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+  when:
+    - mycnf_file.stat.exists == false
+
+- name: copy .my.cnf file with root password credentials
+  template: src="home_my.cnf.j2" dest="{{ mariadb_user_home }}/.my.cnf" owner=root group=root mode=0600
+
+- name: remove anonymous mariadb user
+  mysql_user: "name='' state=absent"
+
+- name: remove mariadb test database
+  mysql_db: "name='test' state=absent"
+
+- name: ensure mariadb is started and enabled on boot
+  service: name={{mariadb_service_name}} state=started enabled=yes
+  when: mariadb_manage_service

@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+{% for v in mariadb_default_config %}
+[{{v.name}}]
+{% for c in v.config %}
+{{c}}
+{% endfor %}
+
+{% endfor %}
+!includedir {{mariadb_includedir}}

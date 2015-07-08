@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: "Pierre Mavro"
+  company: 
+  description: MariaDB
+  license: GPL
+  min_ansible_version: 1.6
+  platforms:
+    - name: Debian
+      versions:
+        - wheezy
+        - jessie
+  categories:
+    - database

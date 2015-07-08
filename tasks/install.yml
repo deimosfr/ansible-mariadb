@@ -1,0 +1,24 @@
+---
+
+- name: add official MariaDB apt key
+  apt_key: id={{mariadb_repo_key_id}} keyserver={{mariadb_repo_key_url}} state=present
+  when: mariadb_set_repository
+
+- name: setup official MariaDB repository
+  apt_repository: repo="{{mariadb_repo}}" state=present update_cache=yes
+  when: mariadb_set_repository
+
+- name: installing MariaDB packages
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - "{{mariadb_package_client}}"
+    - "{{mariadb_package_server}}"
+    - python-mysqldb
+
+- name: installing MariaDB tools
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - mysqltuner
+    - percona-toolkit
+  when: mariadb_install_tools
+  tags: [mysql-tools]
