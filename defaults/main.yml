@@ -28,6 +28,9 @@ mariadb_client_port: 3306
 mariadb_configuration: /etc/mysql/my.cnf
 mariadb_includedir: /etc/mysql/conf.d/
 
+# Configuration vars
+mariadb_datadir: /var/lib/mysql
+
 mariadb_default_config:
   - name: 'client'
     config:
@@ -44,7 +47,7 @@ mariadb_default_config:
       - socket = /var/run/mysqld/mysqld.sock
       - port = 3306
       - basedir = /usr
-      - datadir = /var/lib/mysql
+      - datadir = "{{mariadb_datadir}}"
       - tmpdir = /tmp
       - skip_external_locking = True
       - bind_address = 127.0.0.1

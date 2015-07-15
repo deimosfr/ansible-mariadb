@@ -3,9 +3,9 @@
 - name: add MariaDB users accounts
   mysql_user:
     name: "{{item.name}}"
-    password: "{{item.pass | default('pass')}}"
+    password: "{{item.password | default('pass')}}"
     priv: "{{item.priv | default('*.*:ALL')}}"
     host: "{{item.host | default('localhost')}}"
-    state: present
+    state: "{{item.state | default('present')}}"
   with_items: mariadb_users
   when: mariadb_users|length > 0

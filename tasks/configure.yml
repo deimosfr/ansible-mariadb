@@ -31,3 +31,4 @@
 - name: ensure mariadb is started and enabled on boot
   service: name={{mariadb_service_name}} state=started enabled=yes
   when: mariadb_manage_service
+  changed_when: false
