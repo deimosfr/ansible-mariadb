@@ -2,4 +2,9 @@
 
 - name: restart mariadb
   service: name={{mariadb_service_name}} state=restarted
-  when: mariadb_manage_service
+
+- name: start mariadb
+  service: name={{mariadb_service_name}} state=started
+
+- name: stop mariadb
+  service: name={{mariadb_service_name}} state=stopped

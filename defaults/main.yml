@@ -22,7 +22,10 @@ mariadb_install_tools: False
 mariadb_user_home: /root
 mariadb_root_username: root
 mariadb_root_password: root
+mariadb_debsysmaint_password:
 mariadb_client_port: 3306
+mariadb_uid:
+mariadb_gid:
 
 # MariaDB Configuration
 mariadb_configuration: /etc/mysql/my.cnf

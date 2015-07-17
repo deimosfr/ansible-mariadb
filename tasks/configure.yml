@@ -1,14 +1,77 @@
 ---
 
-- name: setting mariadb configuration
-  template: src=my.cnf.j2 dest="{{mariadb_configuration}}" owner=root group=root mode=0640 backup=yes
-  notify: restart mariadb
+# Manage permissions
+# need to stop mariadb to change uid/gid
+- meta: flush_handlers
+
+# be sure all folders exists before resting permissions
+- name: ensure /run/mysqld folder exists
+  file: path=/run/mysqld owner=mysql group=mysql mode=0755 state=directory
+
+# reseting permissions
+- name: reset mariadb data folder and subfolder to new uid
+  shell: 'find {{item}} -user mysql -exec chown {{mariadb_uid}}:{{mariadb_gid}} {} \;'
+  with_items:
+    - "{{mariadb_datadir}}"
+    - /run/mysqld
+    - /var/run/mysqld
+  when: mariadb_uid or mariadb_gid
+  changed_when: false
+
+- name: reset mariadb log folder and subfolder to new uid
+  file: path=/var/log/mysql owner={{mariadb_uid}} group=adm recurse=yes state=directory
+  when: mariadb_uid
+
+- name: set mariadb user uid
+  user: name=mysql uid={{ mariadb_uid }} state=present
+  when: mariadb_uid
+
+- name: set mariadb user gid
+  group: name=mysql gid={{ mariadb_gid }} state=present
+  when: mariadb_gid
+
+- name: check datadir/mysql is present
+  stat: path={{mariadb_datadir}}/mysql
+  register: datadir_is_ok
+
+# build default tables if absent
+- name: create default databases if not exist
+  command: mysql_install_db --user=mysql --ldata={{mariadb_datadir}}
+  when: datadir_is_ok.stat.exists == False
+
+- name: start temporary mariadb
+  shell: "mysqld_safe --datadir={{mariadb_datadir}} --user=mysql & echo $!"
+  register: mariadb_temp_instance
+  when: datadir_is_ok.stat.exists == False
+
+- name: set .my.cnf root blank password for temporary mariadb
+  lineinfile: dest=/root/.my.cnf regexp='^password=' line='password=' owner=root group=root mode=0600
+  when: datadir_is_ok.stat.exists == False
+
+- name: start mariadb
+  service: name=mysql state=started
+  when: datadir_is_ok.stat.exists
 
 - meta: flush_handlers
 
-- name: check if ~/.my.cnf file already exists
-  stat: "path={{ mariadb_user_home }}/.my.cnf"
-  register: mycnf_file
+# reset debian-sys-maint user password
+- name: set debian-sys-maint user account
+  mysql_user: name='debian-sys-maint' password={{mariadb_debsysmaint_password}} priv=*.*:ALL state=present
+  when: mariadb_debsysmaint_password is defined and mariadb_debsysmaint_password
+
+- name: set debian-sys-maint configuration file
+  template: src=debian.cnf.j2 dest=/etc/mysql/debian.cnf owner=root group=root mode=0600 backup=yes
+  when: mariadb_debsysmaint_password is defined and mariadb_debsysmaint_password
+
+# kill temp mariadb if present
+- name: exit temporary started
+  command: kill {{mariadb_temp_instance.stdout_lines[0]}}
+  when: datadir_is_ok.stat.exists == False
+
+- name: start mariadb
+  service: name=mysql state=started
+
+- meta: flush_handlers
 
 - name: update mariadb root password for all root accounts
   mysql_user: name="root" host="{{ item }}" password="{{ mariadb_root_password }}"
@@ -16,12 +79,15 @@
     - 127.0.0.1
     - ::1
     - localhost
-  when:
-    - mycnf_file.stat.exists == false
+
+- name: setting mariadb configuration
+  template: src=my.cnf.j2 dest="{{mariadb_configuration}}" owner=root group=root mode=0640 backup=yes
+  notify: restart mariadb
 
 - name: copy .my.cnf file with root password credentials
   template: src="home_my.cnf.j2" dest="{{ mariadb_user_home }}/.my.cnf" owner=root group=root mode=0600
 
+# clean default unsecure data
 - name: remove anonymous mariadb user
   mysql_user: "name='' state=absent"
 

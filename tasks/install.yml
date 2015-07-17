@@ -1,5 +1,6 @@
 ---
 
+# Install packages
 - name: add official MariaDB apt key
   apt_key: id={{mariadb_repo_key_id}} keyserver={{mariadb_repo_key_url}} state=present
   when: mariadb_set_repository
@@ -14,6 +15,7 @@
     - "{{mariadb_package_client}}"
     - "{{mariadb_package_server}}"
     - python-mysqldb
+  notify: stop mariadb
 
 - name: installing MariaDB tools
   apt: name={{ item }} state=present update_cache=yes
