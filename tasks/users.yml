@@ -7,5 +7,5 @@
     priv: "{{item.priv | default('*.*:ALL')}}"
     host: "{{item.host | default('localhost')}}"
     state: "{{item.state | default('present')}}"
-  with_items: mariadb_users
-  when: mariadb_users|length > 0
+  with_items: "{{mariadb_users}}"
+  when: "{{mariadb_users|length > 0}}"
