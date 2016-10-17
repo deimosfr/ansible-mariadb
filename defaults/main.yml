@@ -89,7 +89,7 @@ mariadb_default_config:
   - name: 'mysqldump'
     config:
       - quick
-      - quotes-names
+      - quote-names
       - max_allowed_packet = 16M
   - name: 'isamchk'
     config:
