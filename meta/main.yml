@@ -4,7 +4,7 @@ galaxy_info:
   company: 
   description: MariaDB
   license: GPL
-  min_ansible_version: 1.6
+  min_ansible_version: 2.4
   platforms:
     - name: Debian
       versions:
