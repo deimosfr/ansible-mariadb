@@ -1,10 +1,10 @@
 ---
 
-- include: install.yml
+- import_tasks: install.yml
   tags: [mariadb]
-- include: configure.yml
+- import_tasks: configure.yml
   tags: [mariadb]
-- include: databases.yml
+- import_tasks: databases.yml
   tags: [mariadb]
-- include: users.yml
+- import_tasks: users.yml
   tags: [mariadb]
