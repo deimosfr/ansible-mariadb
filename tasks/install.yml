@@ -2,7 +2,7 @@
 
 # Install packages
 - name: add official MariaDB apt key
-  apt_key: id={{mariadb_repo_key_id}} keyserver={{mariadb_repo_key_url}} state=present
+  apt_key: url={{ mariadb_repo_key_url }} state=present
   when: mariadb_set_repository
 
 - name: setup official MariaDB repository

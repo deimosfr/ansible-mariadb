@@ -2,10 +2,9 @@
 
 # MariaDB repository
 mariadb_set_repository: True
-mariadb_version: 10.0
-mariadb_repo: 'deb http://ftp.igh.cnrs.fr/pub/mariadb/repo/{{mariadb_version}}/debian {{ansible_distribution_release}} main'
-mariadb_repo_key_id: '1BB943DB'
-mariadb_repo_key_url: 'keyserver.ubuntu.com'
+mariadb_version: 10.4
+mariadb_repo: 'deb https://ftp.harukasan.org/mariadb/repo/{{mariadb_version}}/debian {{ansible_distribution_release}} main'
+mariadb_repo_key_url: https://mariadb.org/mariadb_release_signing_key.asc
 
 # MariaDB Packages
 mariadb_package_client: mariadb-client
